@@ -1,10 +1,10 @@
 ## p1
 
-|               |          |
+|     func      |          |
 | :-----------: | :------: |
 |    retaddr    |          |
 |               |  rbp+8   |
-|  old rbp ()   | （func)  |
+|  old rbp ()   |          |
 |               | <-- %rbp |
 |   buffer[8]   |          |
 |               |  rbp-8   |
