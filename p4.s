@@ -276,6 +276,7 @@ Disassembly of section .text:
     1361:	55                   	push   %rbp
     1362:	48 89 e5             	mov    %rsp,%rbp
     1365:	48 83 ec 30          	sub    $0x30,%rsp
+    
     1369:	89 7d dc             	mov    %edi,-0x24(%rbp)
     136c:	64 48 8b 04 25 28 00 	mov    %fs:0x28,%rax
     1373:	00 00 

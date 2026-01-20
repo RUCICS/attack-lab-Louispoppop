@@ -181,8 +181,9 @@ Disassembly of section .text:
   40121b:	48 89 e5             	mov    %rsp,%rbp
   40121e:	48 83 ec 50          	sub    $0x50,%rsp
   401222:	89 7d bc             	mov    %edi,-0x44(%rbp)
-  401225:	83 7d bc 72          	cmpl   $0x72,-0x44(%rbp)
+  401225:	83 7d bc 72          	cmpl   $0x72,-0x44(%rbp) # edi=0x72?
   401229:	75 57                	jne    401282 <func1+0x6c>
+
   40122b:	48 b8 59 6f 75 72 20 	movabs $0x63756c2072756f59,%rax
   401232:	6c 75 63 
   401235:	48 ba 6b 79 20 6e 75 	movabs $0x65626d756e20796b,%rdx
@@ -203,6 +204,7 @@ Disassembly of section .text:
   401278:	48 89 c7             	mov    %rax,%rdi
   40127b:	e8 30 fe ff ff       	call   4010b0 <puts@plt>
   401280:	eb 4e                	jmp    4012d0 <func1+0xba>
+
   401282:	48 b8 45 72 72 6f 72 	movabs $0x6e6120726f727245,%rax
   401289:	20 61 6e 
   40128c:	48 ba 73 77 65 72 21 	movabs $0x2172657773,%rdx
@@ -290,15 +292,17 @@ Disassembly of section .text:
   401359:	55                   	push   %rbp
   40135a:	48 89 e5             	mov    %rsp,%rbp
   40135d:	48 83 ec 30          	sub    $0x30,%rsp
-  401361:	48 89 7d d8          	mov    %rdi,-0x28(%rbp)
+
+  401361:	48 89 7d d8          	mov    %rdi,-0x28(%rbp)  ; base(addr) -> rbp-40
   401365:	48 89 e0             	mov    %rsp,%rax
   401368:	48 89 05 a1 21 00 00 	mov    %rax,0x21a1(%rip)        # 403510 <saved_rsp>
-  40136f:	48 8b 4d d8          	mov    -0x28(%rbp),%rcx
-  401373:	48 8d 45 e0          	lea    -0x20(%rbp),%rax
+  40136f:	48 8b 4d d8          	mov    -0x28(%rbp),%rcx  ; rcx=base
+  401373:	48 8d 45 e0          	lea    -0x20(%rbp),%rax  
   401377:	ba 40 00 00 00       	mov    $0x40,%edx
   40137c:	48 89 ce             	mov    %rcx,%rsi
-  40137f:	48 89 c7             	mov    %rax,%rdi
+  40137f:	48 89 c7             	mov    %rax,%rdi  ; rdi=rbp-32
   401382:	e8 69 fd ff ff       	call   4010f0 <memcpy@plt>
+  # memcpy(&(rbp-32), base, 64)
   401387:	48 8d 05 7a 0c 00 00 	lea    0xc7a(%rip),%rax        # 402008 <_IO_stdin_used+0x8>
   40138e:	48 89 c7             	mov    %rax,%rdi
   401391:	e8 1a fd ff ff       	call   4010b0 <puts@plt>
@@ -338,14 +342,16 @@ Disassembly of section .text:
   401423:	48 89 d6             	mov    %rdx,%rsi
   401426:	48 89 c7             	mov    %rax,%rdi
   401429:	e8 d2 fc ff ff       	call   401100 <fopen@plt>
-  40142e:	48 89 45 f8          	mov    %rax,-0x8(%rbp)
+  40142e:	48 89 45 f8          	mov    %rax,-0x8(%rbp) # <-- fp
   401432:	48 83 7d f8 00       	cmpq   $0x0,-0x8(%rbp)
   401437:	75 19                	jne    401452 <main+0xaa>
+
   401439:	48 8d 05 43 0c 00 00 	lea    0xc43(%rip),%rax        # 402083 <_IO_stdin_used+0x83>
   401440:	48 89 c7             	mov    %rax,%rdi
   401443:	e8 c8 fc ff ff       	call   401110 <perror@plt>
   401448:	b8 01 00 00 00       	mov    $0x1,%eax
-  40144d:	e9 8d 00 00 00       	jmp    4014df <main+0x137>
+  40144d:	e9 8d 00 00 00       	jmp    4014df <main+0x137>  # 以上都是打开文件部分
+
   401452:	48 8b 55 f8          	mov    -0x8(%rbp),%rdx
   401456:	48 8d 85 f0 fe ff ff 	lea    -0x110(%rbp),%rax
   40145d:	48 89 d1             	mov    %rdx,%rcx
@@ -355,7 +361,8 @@ Disassembly of section .text:
   40146d:	e8 4e fc ff ff       	call   4010c0 <fread@plt>
   401472:	48 89 45 f0          	mov    %rax,-0x10(%rbp)
   401476:	48 83 7d f0 00       	cmpq   $0x0,-0x10(%rbp)
-  40147b:	75 22                	jne    40149f <main+0xf7>
+  40147b:	75 22                	jne    40149f <main+0xf7>  # 读取文件
+
   40147d:	48 8d 05 05 0c 00 00 	lea    0xc05(%rip),%rax        # 402089 <_IO_stdin_used+0x89>
   401484:	48 89 c7             	mov    %rax,%rdi
   401487:	e8 84 fc ff ff       	call   401110 <perror@plt>
@@ -364,16 +371,18 @@ Disassembly of section .text:
   401493:	e8 38 fc ff ff       	call   4010d0 <fclose@plt>
   401498:	b8 01 00 00 00       	mov    $0x1,%eax
   40149d:	eb 40                	jmp    4014df <main+0x137>
+
   40149f:	48 8d 95 f0 fe ff ff 	lea    -0x110(%rbp),%rdx
   4014a6:	48 8b 45 f0          	mov    -0x10(%rbp),%rax
   4014aa:	48 01 d0             	add    %rdx,%rax
-  4014ad:	c6 00 00             	movb   $0x0,(%rax)
+  4014ad:	c6 00 00             	movb   $0x0,(%rax)  
   4014b0:	48 8b 45 f8          	mov    -0x8(%rbp),%rax
   4014b4:	48 89 c7             	mov    %rax,%rdi
   4014b7:	e8 14 fc ff ff       	call   4010d0 <fclose@plt>
+
   4014bc:	48 8d 85 f0 fe ff ff 	lea    -0x110(%rbp),%rax
   4014c3:	48 89 c7             	mov    %rax,%rdi
-  4014c6:	e8 8a fe ff ff       	call   401355 <func>
+  4014c6:	e8 8a fe ff ff       	call   401355 <func> # func(base)
   4014cb:	48 8d 05 bd 0b 00 00 	lea    0xbbd(%rip),%rax        # 40208f <_IO_stdin_used+0x8f>
   4014d2:	48 89 c7             	mov    %rax,%rdi
   4014d5:	e8 d6 fb ff ff       	call   4010b0 <puts@plt>
